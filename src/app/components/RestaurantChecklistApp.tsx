@@ -92,6 +92,7 @@ export default function RestaurantChecklistApp() {
   };
 
   const handleSave = (): void => {
+    setIsLoading(true);
     if (!formData.managerName.trim()) {
       alert('Please enter manager name before saving.');
       return;
@@ -103,6 +104,7 @@ export default function RestaurantChecklistApp() {
       savedAt: new Date().toISOString(),
     };
     setSavedChecklists((prev) => [checklist, ...prev]);
+    setIsLoading(false);
     alert('✅ Checklist saved successfully!');
   };
 
