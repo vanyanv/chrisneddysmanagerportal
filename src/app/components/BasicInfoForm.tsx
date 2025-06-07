@@ -3,7 +3,7 @@ import { BasicInfoFormProps } from '@/types';
 const BasicInfoForm = ({
   formData,
   onInputChange,
-  showTilFields = false,
+  showTilFields = true,
   shiftOptions = ['opening', 'closing'],
 }: BasicInfoFormProps) => {
   return (
@@ -17,7 +17,7 @@ const BasicInfoForm = ({
             type='date'
             value={formData.date}
             onChange={(e) => onInputChange('date', e.target.value)}
-            className='w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
+            className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
           />
         </div>
         <div>
@@ -27,7 +27,7 @@ const BasicInfoForm = ({
           <select
             value={formData.shift}
             onChange={(e) => onInputChange('shift', e.target.value)}
-            className='w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
+            className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
           >
             {shiftOptions.map((option) => (
               <option key={option} value={option}>

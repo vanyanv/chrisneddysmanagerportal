@@ -107,7 +107,7 @@ export default function RestaurantChecklistApp() {
           <BasicInfoForm
             formData={formData}
             onInputChange={handleInputChange}
-            showTilFields={formData.shift === 'opening'}
+            showTilFields={true}
           />
         </div>
 
