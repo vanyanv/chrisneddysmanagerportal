@@ -12,7 +12,7 @@ export const PrepSection = ({
   prepItems = [
     'meat',
     'sauceBatches',
-    'sauceCups',
+    'sauceBottles',
     'onions',
     'tomato',
     'lettuce',
@@ -22,7 +22,7 @@ export const PrepSection = ({
 }: PrepSectionProps) => {
   // Calculate completion based on filled quantities
   const completedItems = prepItems.filter(
-    (item) => prepQuantities[item] && prepQuantities[item].trim() !== ''
+    (item) => prepQuantities[item] && prepQuantities[item] !== 0
   ).length;
   const progress = Math.round((completedItems / prepItems.length) * 100);
 
@@ -64,7 +64,7 @@ export const PrepSection = ({
           <div className='space-y-3'>
             {prepItems.map((item) => {
               const hasValue =
-                prepQuantities[item] && prepQuantities[item].trim() !== '';
+                prepQuantities[item] && prepQuantities[item] !== 0;
               return (
                 <div
                   key={item}
@@ -75,7 +75,7 @@ export const PrepSection = ({
                       {getTaskLabel(item)}
                     </label>
                     <input
-                      type='text'
+                      type='number'
                       value={prepQuantities[item]}
                       onChange={(e) =>
                         onPrepQuantityChange(item, e.target.value)

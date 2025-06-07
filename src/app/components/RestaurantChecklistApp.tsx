@@ -82,7 +82,7 @@ export default function RestaurantChecklistApp() {
       const prepKey = key as PrepItem;
       taskCompletion[`prep_${key}`] = Boolean(
         formData.prepQuantities[prepKey] &&
-          formData.prepQuantities[prepKey].trim() !== ''
+          formData.prepQuantities[prepKey] !== 0
       );
     });
 

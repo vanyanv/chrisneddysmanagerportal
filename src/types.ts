@@ -1,14 +1,14 @@
 import { LucideIcon } from 'lucide-react';
 
 export interface PrepQuantities {
-  meat: string;
-  sauceBatches: string;
-  sauceCups: string;
-  onions: string;
-  tomato: string;
-  lettuce: string;
-  yellowChiles: string;
-  pickles: string;
+  meat: number;
+  sauceBatches: number;
+  sauceBottles: number;
+  onions: number;
+  tomato: number;
+  lettuce: number;
+  yellowChiles: number;
+  pickles: number;
 }
 
 export interface OpeningTasks {
