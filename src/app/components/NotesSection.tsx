@@ -35,9 +35,9 @@ export const NotesSection = ({
 
       {isExpanded && (
         <div className='px-4 pb-4'>
-          <div className='space-y-4'>
+          <div className='space-y-4 text-black'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 mb-2 '>
                 General Notes
               </label>
               <textarea
