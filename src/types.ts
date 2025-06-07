@@ -3,12 +3,14 @@ import { LucideIcon } from 'lucide-react';
 export interface PrepQuantities {
   meat: number;
   sauceBatches: number;
-  sauceBottles: number;
+  sauceCups: number;
   onions: number;
   tomato: number;
   lettuce: number;
   yellowChiles: number;
   pickles: number;
+  // ✅ Add index signature to allow dynamic access
+  [key: string]: number;
 }
 
 export interface OpeningTasks {
@@ -21,6 +23,8 @@ export interface OpeningTasks {
   setupTrashcans: boolean;
   checkRestrooms: boolean;
   temperatureACCheck: boolean;
+  // ✅ Add index signature to allow dynamic access
+  [key: string]: boolean;
 }
 
 export interface ClosingTasks {
@@ -34,6 +38,8 @@ export interface ClosingTasks {
   filterFryer: boolean;
   dumpOilSunday: boolean;
   lockAllDoors: boolean;
+  // ✅ Add index signature to allow dynamic access
+  [key: string]: boolean;
 }
 
 export type ShiftType = 'opening' | 'closing';
@@ -103,11 +109,11 @@ export interface PrepSectionProps {
   sectionKey: string;
   color: string;
   prepQuantities: PrepQuantities;
-  onPrepQuantityChange: (item: PrepItem, value: string) => void;
+  onPrepQuantityChange: (key: keyof PrepQuantities, value: number) => void;
   isExpanded: boolean;
-  onToggle: (sectionKey: string) => void;
-  getTaskLabel: (key: string) => string;
-  prepItems?: PrepItem[];
+  onToggle: (key: string) => void;
+  getTaskLabel: (key: keyof PrepQuantities) => string;
+  prepItems?: Array<keyof PrepQuantities>;
 }
 
 export interface DuringHoursReminderProps {

@@ -34,7 +34,7 @@ export const createInitialFormData = (): FormData => ({
   prepQuantities: {
     meat: 0,
     sauceBatches: 0,
-    sauceBottles: 0,
+    sauceCups: 0,
     onions: 0,
     tomato: 0,
     lettuce: 0,

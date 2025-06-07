@@ -1,111 +1,79 @@
 'use client';
-import React, { useState } from 'react';
-import { Clock, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { SavedChecklist, PrepQuantities } from '@/types';
 import {
-  FormData,
-  ExpandedSections,
-  SavedChecklist,
-  TaskCategory,
-  PrepItem,
-} from '@/types';
-import { createInitialFormData } from '@/utils/createInitialFormData';
+  getLocalChecklists,
+  getGoogleSheetsConfig,
+} from '@/utils/googleSheets';
 import { createTaskLabels } from '@/utils/createTaskLabels';
+
+// Custom Hooks
+import { useFormState } from '../hooks/useFormState';
+import { useSaveLogic } from '../hooks/useSaveLogic';
+
+// Components
 import BasicInfoForm from './BasicInfoForm';
 import { BottomActionBar } from './BottomActionBar';
 import ChecklistHeader from './ChecklistHeader';
-import { DuringHoursReminder } from './DuringHoursReminder';
+import { ConnectionStatus } from './ConnectionStatus';
+import { ChecklistSections } from './CheckListSections';
 import { NotesSection } from './NotesSection';
-import { PrepSection } from './PrepSection';
-import { TaskSection } from './TaskSection';
 import { RecentSaves } from './RecentSaves';
 
 export default function RestaurantChecklistApp() {
-  const [formData, setFormData] = useState<FormData>(createInitialFormData());
-
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
-    beforeOpen: true,
-    prep: false,
-    afterClose: true,
-    closingPrep: false,
-    notes: false,
-  });
-
+  // External state
   const [savedChecklists, setSavedChecklists] = useState<SavedChecklist[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
 
+  // Custom hooks
+  const {
+    formData,
+    expandedSections,
+    handleInputChange,
+    handleTaskChange,
+    handlePrepQuantityChange,
+    toggleSection,
+    calculateOverallProgress,
+  } = useFormState();
+
+  const { isLoading, handleSave, getSaveButtonText } = useSaveLogic(
+    (newChecklist) => {
+      setSavedChecklists((prev) => [newChecklist, ...prev.slice(0, 9)]);
+    }
+  );
+
+  // Configuration
   const taskLabels = createTaskLabels();
+  const googleConfig = getGoogleSheetsConfig();
 
-  const handleInputChange = (field: keyof FormData, value: string): void => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  // Monitor online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-  const handleTaskChange = (
-    category: TaskCategory,
-    task: string,
-    checked: boolean
-  ): void => {
-    setFormData((prev) => ({
-      ...prev,
-      [category]: { ...prev[category], [task]: checked },
-    }));
-  };
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
-  const handlePrepQuantityChange = (item: PrepItem, value: string): void => {
-    setFormData((prev) => ({
-      ...prev,
-      prepQuantities: { ...prev.prepQuantities, [item]: value },
-    }));
-  };
-
-  const toggleSection = (section: string): void => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  const getTaskLabel = (key: string): string => {
-    return (
-      taskLabels[key] ||
-      key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())
-    );
-  };
-
-  const calculateOverallProgress = (): number => {
-    let taskCompletion: Record<string, boolean> = {}; // ✅ Fixed variable name to avoid confusion
-
-    if (formData.shift === 'opening') {
-      taskCompletion = { ...formData.openingTasks };
-    } else {
-      taskCompletion = { ...formData.closingTasks };
-    }
-
-    // Add prep completion - convert string values to boolean
-    Object.keys(formData.prepQuantities).forEach((key) => {
-      const prepKey = key as PrepItem;
-      taskCompletion[`prep_${key}`] = Boolean(
-        formData.prepQuantities[prepKey] &&
-          formData.prepQuantities[prepKey] !== 0
-      );
-    });
-
-    const completed = Object.values(taskCompletion).filter(Boolean).length;
-    const total = Object.values(taskCompletion).length;
-    return Math.round((completed / total) * 100);
-  };
-
-  const handleSave = (): void => {
-    setIsLoading(true);
-    if (!formData.managerName.trim()) {
-      alert('Please enter manager name before saving.');
-      return;
-    }
-
-    const checklist: SavedChecklist = {
-      id: Date.now(),
-      ...formData,
-      savedAt: new Date().toISOString(),
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
-    setSavedChecklists((prev) => [checklist, ...prev]);
-    setIsLoading(false);
-    alert('✅ Checklist saved successfully!');
+  }, []);
+
+  // Load local checklists on mount
+  useEffect(() => {
+    const localChecklists = getLocalChecklists();
+    setSavedChecklists(localChecklists);
+  }, []);
+
+  // Utility functions
+  const getTaskLabel = (key: keyof PrepQuantities): string => {
+    return (
+      taskLabels[key as string] ||
+      (key as string)
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, (str) => str.toUpperCase())
+    );
   };
 
   const handleDownload = (): void => {
@@ -125,11 +93,16 @@ export default function RestaurantChecklistApp() {
     <div className='min-h-screen bg-gray-50 pb-24'>
       <ChecklistHeader
         overallProgress={calculateOverallProgress()}
-        showSetupWarning={true}
-        title='ChrisnEddys Manager Checklist'
+        showSetupWarning={!googleConfig.isConfigured}
+        title='Manager Checklist'
       />
 
       <div className='p-4'>
+        <ConnectionStatus
+          isOnline={isOnline}
+          isGoogleConfigured={googleConfig.isConfigured}
+        />
+
         <div className='bg-white rounded-lg shadow-sm border p-4 mb-4'>
           <BasicInfoForm
             formData={formData}
@@ -138,62 +111,14 @@ export default function RestaurantChecklistApp() {
           />
         </div>
 
-        {formData.shift === 'opening' ? (
-          <>
-            <TaskSection
-              title='Before Open'
-              tasks={formData.openingTasks}
-              category='openingTasks'
-              icon={Clock}
-              sectionKey='beforeOpen'
-              color='bg-blue-500'
-              isExpanded={expandedSections.beforeOpen}
-              onToggle={toggleSection}
-              onTaskChange={handleTaskChange}
-              getTaskLabel={getTaskLabel}
-            />
-
-            <PrepSection
-              title='Prep Completed'
-              sectionKey='prep' // ✅ Fixed: was closingPrep, should be prep for opening
-              color='bg-green-500'
-              prepQuantities={formData.prepQuantities}
-              onPrepQuantityChange={handlePrepQuantityChange}
-              isExpanded={expandedSections.prep} // ✅ Fixed: use prep instead of closingPrep
-              onToggle={toggleSection}
-              getTaskLabel={getTaskLabel}
-            />
-          </>
-        ) : (
-          // ✅ Added missing closing section
-          <>
-            <TaskSection
-              title='After Close Manager Sign-off'
-              tasks={formData.closingTasks}
-              category='closingTasks'
-              icon={CheckCircle2}
-              sectionKey='afterClose'
-              color='bg-purple-500'
-              isExpanded={expandedSections.afterClose}
-              onToggle={toggleSection}
-              onTaskChange={handleTaskChange}
-              getTaskLabel={getTaskLabel}
-            />
-
-            <PrepSection
-              title='Prep Completed'
-              sectionKey='closingPrep'
-              color='bg-green-500'
-              prepQuantities={formData.prepQuantities}
-              onPrepQuantityChange={handlePrepQuantityChange}
-              isExpanded={expandedSections.closingPrep}
-              onToggle={toggleSection}
-              getTaskLabel={getTaskLabel}
-            />
-          </>
-        )}
-
-        <DuringHoursReminder />
+        <ChecklistSections
+          formData={formData}
+          expandedSections={expandedSections}
+          onToggleSection={toggleSection}
+          onTaskChange={handleTaskChange}
+          onPrepQuantityChange={handlePrepQuantityChange}
+          getTaskLabel={getTaskLabel}
+        />
 
         <NotesSection
           notes={formData.notes}
@@ -208,9 +133,10 @@ export default function RestaurantChecklistApp() {
       </div>
 
       <BottomActionBar
-        onSave={handleSave}
+        onSave={() => handleSave(formData)}
         onDownload={handleDownload}
         isLoading={isLoading}
+        saveText={getSaveButtonText(isOnline, googleConfig.isConfigured)}
       />
     </div>
   );

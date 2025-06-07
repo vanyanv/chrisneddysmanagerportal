@@ -1,5 +1,6 @@
 import { PrepSectionProps } from '@/types';
 import { CheckCircle2, ChevronUp, ChevronDown } from 'lucide-react';
+
 export const PrepSection = ({
   title,
   sectionKey,
@@ -22,7 +23,7 @@ export const PrepSection = ({
 }: PrepSectionProps) => {
   // Calculate completion based on filled quantities
   const completedItems = prepItems.filter(
-    (item) => prepQuantities[item] && prepQuantities[item] !== 0
+    (item) => prepQuantities[item] && prepQuantities[item] > 0
   ).length;
   const progress = Math.round((completedItems / prepItems.length) * 100);
 
@@ -63,8 +64,9 @@ export const PrepSection = ({
         <div className='px-4 pb-4'>
           <div className='space-y-3'>
             {prepItems.map((item) => {
-              const hasValue =
-                prepQuantities[item] && prepQuantities[item] !== 0;
+              const currentValue = prepQuantities[item] || 0;
+              const hasValue = currentValue > 0;
+
               return (
                 <div
                   key={item}
@@ -76,10 +78,15 @@ export const PrepSection = ({
                     </label>
                     <input
                       type='number'
-                      value={prepQuantities[item]}
-                      onChange={(e) =>
-                        onPrepQuantityChange(item, e.target.value)
-                      }
+                      min='0'
+                      step='0.1'
+                      value={currentValue === 0 ? '' : currentValue}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Handle empty string as 0, otherwise parse as number
+                        const numValue = value === '' ? 0 : Number(value);
+                        onPrepQuantityChange(item, numValue);
+                      }}
                       placeholder='Enter quantity/amount'
                       className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
                     />

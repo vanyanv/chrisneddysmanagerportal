@@ -1,6 +1,7 @@
 import { ChecklistHeaderProps } from '@/types';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
-
+import { AlertCircle } from 'lucide-react';
+import logo from '../../../public/logo.png';
+import Image from 'next/image';
 const ChecklistHeader = ({
   overallProgress,
   showSetupWarning = false,
@@ -11,7 +12,14 @@ const ChecklistHeader = ({
       <div className='p-4'>
         <div className='flex items-center justify-between mb-3'>
           <div className='flex items-center gap-3'>
-            <CheckCircle2 className='w-8 h-8 text-blue-600' />
+            <Image
+              src={logo}
+              height={150}
+              width={150}
+              alt='Logo'
+              className='object-contain'
+            />
+
             <h1 className='text-xl font-bold text-gray-800'>{title}</h1>
           </div>
           <div className='flex items-center gap-2'>
