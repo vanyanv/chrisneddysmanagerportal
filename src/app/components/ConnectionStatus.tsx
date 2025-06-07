@@ -1,6 +1,6 @@
 // components/ConnectionStatus.tsx
-import React from 'react';
-import { Wifi, WifiOff } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { WifiOff, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface ConnectionStatusProps {
   isOnline: boolean;
@@ -11,33 +11,59 @@ export const ConnectionStatus = ({
   isOnline,
   isGoogleConfigured,
 }: ConnectionStatusProps) => {
-  const getStatusMessage = () => {
-    if (isOnline && isGoogleConfigured) {
-      return 'Connected - Saving to Google Sheets';
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // ✅ FIXED: Show neutral state during SSR/hydration
+  if (!isMounted) {
+    return (
+      <div className='flex items-center gap-2 p-3 rounded-lg mb-4 border bg-gray-50 border-gray-200'>
+        <div className='w-4 h-4 bg-gray-300 rounded animate-pulse' />
+        <span className='text-sm text-gray-600'>Checking connection...</span>
+      </div>
+    );
+  }
+
+  // ✅ Now safe to render dynamic content after mount
+  const getStatus = () => {
+    if (!isOnline) {
+      return {
+        icon: WifiOff,
+        className: 'bg-red-50 border-red-200 text-red-700',
+        iconClassName: 'text-red-500',
+        message: 'Offline - Data will be saved locally',
+      };
     }
-    if (isOnline && !isGoogleConfigured) {
-      return 'Online - Saving locally (Google Sheets not configured)';
+
+    if (!isGoogleConfigured) {
+      return {
+        icon: AlertCircle,
+        className: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+        iconClassName: 'text-yellow-500',
+        message: 'Google Sheets not configured - Using local storage',
+      };
     }
-    return 'Offline - Will save locally';
+
+    return {
+      icon: CheckCircle,
+      className: 'bg-green-50 border-green-200 text-green-700',
+      iconClassName: 'text-green-500',
+      message: 'Connected - Data will sync to Google Sheets',
+    };
   };
 
-  const getStatusColor = () => {
-    if (isOnline && isGoogleConfigured) {
-      return 'bg-green-50 border-green-200 text-green-800';
-    }
-    return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-  };
+  const status = getStatus();
+  const Icon = status.icon;
 
   return (
     <div
-      className={`flex items-center gap-2 p-3 rounded-lg mb-4 border ${getStatusColor()}`}
+      className={`flex items-center gap-2 p-3 rounded-lg mb-4 border ${status.className}`}
     >
-      {isOnline ? (
-        <Wifi className='w-4 h-4' />
-      ) : (
-        <WifiOff className='w-4 h-4' />
-      )}
-      <span className='text-sm font-medium'>{getStatusMessage()}</span>
+      <Icon className={`w-4 h-4 ${status.iconClassName}`} />
+      <span className='text-sm font-medium'>{status.message}</span>
     </div>
   );
 };

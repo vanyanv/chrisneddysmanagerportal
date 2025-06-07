@@ -137,6 +137,8 @@ export default function RestaurantChecklistApp() {
         onDownload={handleDownload}
         isLoading={isLoading}
         saveText={getSaveButtonText(isOnline, googleConfig.isConfigured)}
+        isOnline={isOnline}
+        isGoogleConfigured={googleConfig.isConfigured}
       />
     </div>
   );
