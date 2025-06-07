@@ -8,7 +8,7 @@ const BasicInfoForm = ({
 }: BasicInfoFormProps) => {
   return (
     <div className='space-y-3 text-black'>
-      <div className='grid grid-cols-2 gap-3'>
+      <div className='grid grid-cols-2 gap-3 '>
         <div>
           <label className='block text-sm font-medium text-gray-700 mb-1'>
             Date
@@ -57,25 +57,59 @@ const BasicInfoForm = ({
             <label className='block text-sm font-medium text-gray-700 mb-1'>
               Starting Til (w/ Coins)
             </label>
-            <input
-              type='text'
-              value={formData.startingTil}
-              onChange={(e) => onInputChange('startingTil', e.target.value)}
-              placeholder='$0.00'
-              className='w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
-            />
+            <div className='relative'>
+              <span className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500'>
+                $
+              </span>
+              <input
+                type='number'
+                step='0.01'
+                min='0'
+                value={formData.startingTil}
+                onChange={(e) => onInputChange('startingTil', e.target.value)}
+                placeholder='0.00'
+                className='w-full pl-8 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
+              />
+            </div>
           </div>
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-1'>
               Ending Til (w/ Coins)
             </label>
-            <input
-              type='text'
-              value={formData.endingTil}
-              onChange={(e) => onInputChange('endingTil', e.target.value)}
-              placeholder='$0.00'
-              className='w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
-            />
+            <div className='relative'>
+              <span className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500'>
+                $
+              </span>
+              <input
+                type='number'
+                step='0.01'
+                min='0'
+                value={formData.endingTil}
+                onChange={(e) => onInputChange('endingTil', e.target.value)}
+                placeholder='0.00'
+                className='w-full pl-8 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base'
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Simple til difference */}
+      {showTilFields && formData.startingTil > 0 && formData.endingTil > 0 && (
+        <div className='bg-blue-50 border border-blue-200 rounded-lg p-3'>
+          <div className='flex justify-between items-center'>
+            <span className='text-sm font-medium text-blue-800'>
+              Til Difference:
+            </span>
+            <span
+              className={`text-sm font-bold ${
+                formData.endingTil >= formData.startingTil
+                  ? 'text-green-600'
+                  : 'text-red-600'
+              }`}
+            >
+              ${(formData.endingTil - formData.startingTil).toFixed(2)}
+            </span>
           </div>
         </div>
       )}

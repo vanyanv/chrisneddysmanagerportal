@@ -4,8 +4,8 @@ export const createInitialFormData = (): FormData => ({
   date: new Date().toISOString().split('T')[0],
   managerName: '',
   shift: 'opening',
-  startingTil: '',
-  endingTil: '',
+  startingTil: 0,
+  endingTil: 0,
   notes: '',
   issues: '',
   openingTasks: {

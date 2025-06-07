@@ -36,12 +36,14 @@ export interface ClosingTasks {
   lockAllDoors: boolean;
 }
 
+export type ShiftType = 'opening' | 'closing';
+
 export interface FormData {
   date: string;
   managerName: string;
-  shift: 'opening' | 'closing';
-  startingTil: string;
-  endingTil: string;
+  shift: ShiftType;
+  startingTil: number; // ✅ Changed from string to number
+  endingTil: number; // ✅ Changed from string to number
   notes: string;
   issues: string;
   openingTasks: OpeningTasks;
